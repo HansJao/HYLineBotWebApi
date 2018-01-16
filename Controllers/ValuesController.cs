@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using Line.Messaging.Webhooks;
 using System.Net;
+using System.IO;
 
 namespace HYLineWebApi.Controllers
 {
@@ -57,7 +58,13 @@ namespace HYLineWebApi.Controllers
         [HttpPost]
         public async Task<HttpResponseMessage> Post(HttpRequestMessage request)
         {
-            var events = await request.GetWebhookEventsAsync("c1f910527e6456141087387d2ce2b783");
+            var postData = string.Empty;
+            using (StreamReader reader = new StreamReader(Request.Body))
+            {
+                postData = reader.ReadToEnd();
+            }
+            var events =  WebhookEventParser.Parse(postData);
+           // var events = await request.GetWebhookEventsAsync("c1f910527e6456141087387d2ce2b783");
             //lineMessagingClient = new LineMessagingClient("VO8CJj2Uwn2h5Mjm4884whpRKOXonme17QnbPQXatFKIDckf33rFM8jL+8Qv0hCPY0unc80NrZiWKR/Ut4qv1gSuRUAYdXZwMhctijKzqsVRbVD3Vm1STrcdMQzzu0QKeTjd/5pFDHF6jc9w35OKbwdB04t89/1O/w1cDnyilFU=");
             LinebotApp app = new LinebotApp(lineMessagingClient);
             await app.RunAsync(events);
