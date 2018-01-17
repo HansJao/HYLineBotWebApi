@@ -46,7 +46,7 @@ namespace HYLineWebApi.Controllers
                 case "help":
                     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
                     {
-                        new TextMessage("======查詢指令1======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
+                        new TextMessage("======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
                     });
                     break;
                 default:
@@ -67,40 +67,38 @@ namespace HYLineWebApi.Controllers
             {
                 actions.Add(new MessageTemplateAction(textile.Key, string.Concat("?名稱 ", textile.Key)));
             }
+            int totalCount = 6;
             int perPage = 3;
             int defaultPage = messageSpilt.Count() == 3 ? Convert.ToInt32(messageSpilt[2]) : 0;
-            for (var i = defaultPage; i <= actions.Count() % 3; i++)
+            actions = actions.Skip(totalCount * defaultPage).Take(totalCount).ToList();
+            if(actions.Count() == 0)
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("已無資料") });
+                return;
+            }
+            for (var i = 0; i < totalCount / 3; i++)
             {
                 var eachPage = actions.Skip(perPage * i).Take(perPage).ToList();
                 column.Add(new CarouselColumn(string.Concat("搜尋的倉庫:", messageSpilt[1]), actions: eachPage));
             }
+//   var eachPage = actions.Skip(perPage * i).Take(perPage).Count() == 1 
+//                 ? actions.Skip(perPage * i).Take(perPage).ToList()
+//                 :actions.Skip(perPage * i).Take(perPage).ToList();
+            if(column.Last().Actions.Count() != 3)
+            {
+                column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1]," ", defaultPage + 1)));
+            }else
+            {
+                column.Add(new CarouselColumn("欲搜尋下一頁請點選", actions: new List<ITemplateAction>()
+                {
+                   new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1]," ", defaultPage + 1)),
+                   new MessageTemplateAction("", string.Concat("?倉庫 ", messageSpilt[1]," ", defaultPage + 1))
+                }));
+            }
 
             var replyMessage = new TemplateMessage("Button Template",
                 new CarouselTemplate(column));
-
-                 List<ITemplateAction> actions1 = new List<ITemplateAction>();
-                List<ITemplateAction> actions2 = new List<ITemplateAction>();
-
-                // Add actions.
-                actions1.Add(new MessageTemplateAction("Message Label", "sample data"));
-                actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
-                actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
-
-                // Add datetime picker actions
-                actions2.Add(new DateTimePickerTemplateAction("DateTime Picker", "DateTime",
-                    DateTimePickerMode.Datetime, "2017-07-21T13:00", null, null));
-                actions2.Add(new DateTimePickerTemplateAction("Date Picker", "Date",
-                    DateTimePickerMode.Date, "2017-07-21", null, null));
-                actions2.Add(new DateTimePickerTemplateAction("Time Picker", "Time",
-                    DateTimePickerMode.Time, "13:00", null, null));
-
-                replyMessage = new TemplateMessage("Button Template",
-                    new CarouselTemplate(new List<CarouselColumn> {
-                        new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
-                        "Casousel 1 Title", actions.Take(3).ToList()),
-                        new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
-                        "Casousel 1 Title", actions.Take(1).ToList())
-                    }));
+                
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
 
