@@ -17,7 +17,11 @@ namespace HYLineWebApi.Controllers
         }
 
         #region Handlers
-
+        public async Task SendMessage(IEnumerable<WebhookEvent> ev)
+        {
+            var firstEvent = (MessageEvent)ev.ToList().First();
+            await HandleTextAsync(firstEvent.ReplyToken, ((TextEventMessage)firstEvent.Message).Text, firstEvent.Source.UserId);
+        }
         protected override async Task OnMessageAsync(MessageEvent ev)
         {            
             switch (ev.Message.Type)

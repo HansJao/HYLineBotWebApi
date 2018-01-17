@@ -67,9 +67,10 @@ namespace HYLineWebApi.Controllers
            // var events = await request.GetWebhookEventsAsync("c1f910527e6456141087387d2ce2b783");
             //lineMessagingClient = new LineMessagingClient("VO8CJj2Uwn2h5Mjm4884whpRKOXonme17QnbPQXatFKIDckf33rFM8jL+8Qv0hCPY0unc80NrZiWKR/Ut4qv1gSuRUAYdXZwMhctijKzqsVRbVD3Vm1STrcdMQzzu0QKeTjd/5pFDHF6jc9w35OKbwdB04t89/1O/w1cDnyilFU=");
             LinebotApp app = new LinebotApp(lineMessagingClient);
-            await app.RunAsync(events);
+            await app.SendMessage(events);
+            //await app.RunAsync(events);
             var response = new HttpResponseMessage(HttpStatusCode.OK);//test
             return response;
-        }      
+        }
     }
 }
