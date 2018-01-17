@@ -68,7 +68,8 @@ namespace HYLineWebApi.Controllers
                 actions.Add(new MessageTemplateAction(textile.Key, string.Concat("?名稱 ", textile.Key)));
             }
             int perPage = 3;
-            for (var i = 0; i <= actions.Count() % 3; i++)
+            int defaultPage = messageSpilt.Count() == 3 ? Convert.ToInt32(messageSpilt[2]) : 0;
+            for (var i = defaultPage; i <= actions.Count() % 3; i++)
             {
                 var eachPage = actions.Skip(perPage * i).Take(perPage).ToList();
                 column.Add(new CarouselColumn(string.Concat("搜尋的倉庫:", messageSpilt[1]), actions: eachPage));
