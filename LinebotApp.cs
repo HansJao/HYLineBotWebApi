@@ -99,7 +99,7 @@ namespace HYLineWebApi.Controllers
                         new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
                         "Casousel 1 Title", actions.Take(3).ToList()),
                         new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
-                        "Casousel 1 Title", actions.Skip(3).Take(3).ToList())
+                        "Casousel 1 Title", actions.Skip(1).Take(3).ToList())
                     }));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
