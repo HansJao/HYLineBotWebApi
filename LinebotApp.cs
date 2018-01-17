@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HYLineBotWebApi.Adapter;
 using Line.Messaging;
 using Line.Messaging.Webhooks;
 
@@ -27,13 +28,14 @@ namespace HYLineWebApi.Controllers
         {
             var mev = (MessageEvent)eventList.ToList().First();
             var message = ((TextEventMessage)mev.Message).Text;
-            switch (ConvertToNarrow(message.Split(' ').FirstOrDefault()).ToLower())
+            var messageSpilt = message.Split(' ');
+            switch (ConvertToNarrow(messageSpilt.FirstOrDefault()).ToLower())
             {
                 case "!":
                     await HandleTextAsync(mev.ReplyToken, "修改", mev.Source.UserId);
                     break;
                 case "?倉庫":
-                    await HandleTextAsync(mev.ReplyToken, "查詢倉庫", mev.Source.UserId);
+                    await SearchStore(mev, messageSpilt);
                     break;
                 case "?名稱":
                     await HandleTextAsync(mev.ReplyToken, "查詢名稱", mev.Source.UserId);
@@ -42,13 +44,43 @@ namespace HYLineWebApi.Controllers
                     await HandleTextAsync(mev.ReplyToken, "新增", mev.Source.UserId);
                     break;
                 case "help":
-                    var helpResult = @"======查詢指令======\n?倉庫 [倉庫名稱] \n?名稱 [布種名稱] \n======新增指令======\n+ [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n======修改指令======\n! [顆顆,還沒做]\n======刪除指令======\n- [編號]";
-                    await HandleTextAsync(mev.ReplyToken, helpResult, mev.Source.UserId);
+                    await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
+                    {
+                        new TextMessage(@"======查詢指令======
+                        test enter"),
+                        new TextMessage("?倉庫 [倉庫名稱]\n textn"),
+                        new TextMessage("?名稱 [布種名稱]\r\n testrn"),
+                        // new TextMessage("======新增指令======"),
+                        // new TextMessage("+ [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] "),
+                        // new TextMessage("======修改指令======"),
+                        // new TextMessage("! [顆顆,還沒做]"),
+                        // new TextMessage("======刪除指令======"),
+                        // new TextMessage("- [編號]"),
+                    });
                     break;
                 default:
                     return;
             }
-            await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
+            //await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
+        }
+
+        private async Task SearchStore(MessageEvent mev, string[] messageSpilt)
+        {
+            var adapter = new DataAdapter();
+            var areaResult = adapter.SearchArea(messageSpilt[1]);
+            List<ITemplateAction> actions1 = new List<ITemplateAction>();
+
+            // Add actions.
+            actions1.Add(new MessageTemplateAction("Message Label", "sample data"));
+            actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
+            actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
+
+            var replyMessage = new TemplateMessage("Button Template",
+                new CarouselTemplate(new List<CarouselColumn> {
+                        new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
+                        "Casousel 1 Title", actions1)
+                }));
+            await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
 
         private string ConvertToNarrow(string text)
