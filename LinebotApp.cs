@@ -46,7 +46,7 @@ namespace HYLineWebApi.Controllers
                 case "help":
                     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
                     {
-                        new TextMessage("======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
+                        new TextMessage("======查詢指令1======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
                     });
                     break;
                 default:
@@ -99,7 +99,7 @@ namespace HYLineWebApi.Controllers
                         new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
                         "Casousel 1 Title", actions.Take(3).ToList()),
                         new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
-                        "Casousel 1 Title", actions.Skip(1).Take(3).ToList())
+                        "Casousel 1 Title", actions.Take(1).ToList())
                     }));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
