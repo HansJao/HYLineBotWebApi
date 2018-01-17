@@ -97,7 +97,7 @@ namespace HYLineWebApi.Controllers
                 replyMessage = new TemplateMessage("Button Template",
                     new CarouselTemplate(new List<CarouselColumn> {
                         new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
-                        "Casousel 1 Title", actions1),
+                        "Casousel 1 Title", actions.Take(3).ToList()),
                         new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
                         "Casousel 1 Title", actions2)
                     }));
