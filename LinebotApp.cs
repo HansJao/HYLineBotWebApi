@@ -46,7 +46,7 @@ namespace HYLineWebApi.Controllers
                 case "help":
                     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
                     {
-                        new TextMessage(@"======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
+                        new TextMessage("======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
                     });
                     break;
                 default:
@@ -59,17 +59,20 @@ namespace HYLineWebApi.Controllers
         {
             var adapter = new DataAdapter();
             var areaResult = adapter.SearchArea(messageSpilt[1]);
+            var groupByName = areaResult.Take(3).GroupBy(g => g.Name);
             List<ITemplateAction> actions1 = new List<ITemplateAction>();
-
+            foreach (var textile in groupByName)
+            {
+                actions1.Add(new MessageTemplateAction(textile.Key, string.Concat("?名稱", textile.Key)));
+            }
             // Add actions.
-            actions1.Add(new MessageTemplateAction("Message Label", "sample data"));
-            actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
-            actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
+            // actions1.Add(new MessageTemplateAction(groupByName.First().Key, string.Concat("?名稱", groupByName.First().Key)));
+            // actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
+            // actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
 
             var replyMessage = new TemplateMessage("Button Template",
                 new CarouselTemplate(new List<CarouselColumn> {
-                        new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
-                        "Casousel 1 Title", actions1)
+                        new CarouselColumn(messageSpilt[1],actions: actions1)
                 }));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
