@@ -22,31 +22,67 @@ namespace HYLineWebApi.Controllers
             var firstEvent = (MessageEvent)ev.ToList().First();
             await HandleTextAsync(firstEvent.ReplyToken, ((TextEventMessage)firstEvent.Message).Text, firstEvent.Source.UserId);
         }
+
+        public async Task HandleMessage(IEnumerable<WebhookEvent> eventList)
+        {
+            var mev = (MessageEvent)eventList.ToList().First();
+            var message = ((TextEventMessage)mev.Message).Text;
+            switch (ConvertToNarrow(message.Split(' ').FirstOrDefault()).ToLower())
+            {
+                case "!":
+                    await HandleTextAsync(mev.ReplyToken, "修改", mev.Source.UserId);
+                    break;
+                case "?倉庫":
+                    await HandleTextAsync(mev.ReplyToken, "查詢倉庫", mev.Source.UserId);
+                    break;
+                case "?名稱":
+                    await HandleTextAsync(mev.ReplyToken, "查詢名稱", mev.Source.UserId);
+                    break;
+                case "+":
+                    await HandleTextAsync(mev.ReplyToken, "新增", mev.Source.UserId);
+                    break;
+                case "help":
+                    var helpResult = @"======查詢指令======\n?倉庫 [倉庫名稱] \n?名稱 [布種名稱] \n======新增指令======\n+ [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n======修改指令======\n! [顆顆,還沒做]\n======刪除指令======\n- [編號]";
+                    await HandleTextAsync(mev.ReplyToken, helpResult, mev.Source.UserId);
+                    break;
+                default:
+                    return;
+            }
+            await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
+        }
+
+        private string ConvertToNarrow(string text)
+        {
+            var narrow = string.Empty;
+            narrow = text.Replace('？', '?').Replace('＋', '+').Replace('－', '-').Replace('！', '!');
+            return narrow;
+        }
+
         protected override async Task OnMessageAsync(MessageEvent ev)
-        {            
+        {
             switch (ev.Message.Type)
             {
                 case EventMessageType.Text:
                     await HandleTextAsync(ev.ReplyToken, ((TextEventMessage)ev.Message).Text, ev.Source.UserId);
                     break;
-                // case EventMessageType.Image:
-                // case EventMessageType.Audio:
-                // case EventMessageType.Video:
-                // case EventMessageType.File:
-                //     // Prepare blob directory name for binary object.
-                //     var blobDirectoryName = ev.Source.Type + "_" + ev.Source.Id;
-                //     await HandleMediaAsync(ev.ReplyToken, ev.Message.Id, blobDirectoryName, ev.Message.Id);
-                //     break;
-                // case EventMessageType.Location:
-                //     var location = ((LocationEventMessage)ev.Message);
-                //     await HandleLocationAsync(ev.ReplyToken, location);
-                //     break;
-                // case EventMessageType.Sticker:
-                //     await HandleStickerAsync(ev.ReplyToken);
-                //     break;
+                    // case EventMessageType.Image:
+                    // case EventMessageType.Audio:
+                    // case EventMessageType.Video:
+                    // case EventMessageType.File:
+                    //     // Prepare blob directory name for binary object.
+                    //     var blobDirectoryName = ev.Source.Type + "_" + ev.Source.Id;
+                    //     await HandleMediaAsync(ev.ReplyToken, ev.Message.Id, blobDirectoryName, ev.Message.Id);
+                    //     break;
+                    // case EventMessageType.Location:
+                    //     var location = ((LocationEventMessage)ev.Message);
+                    //     await HandleLocationAsync(ev.ReplyToken, location);
+                    //     break;
+                    // case EventMessageType.Sticker:
+                    //     await HandleStickerAsync(ev.ReplyToken);
+                    //     break;
             }
         }
-        
+
         protected override async Task OnPostbackAsync(PostbackEvent ev)
         {
             switch (ev.Postback.Data)
@@ -69,7 +105,7 @@ namespace HYLineWebApi.Controllers
                     break;
             }
         }
-        
+
         protected override async Task OnFollowAsync(FollowEvent ev)
         {
 
@@ -82,7 +118,7 @@ namespace HYLineWebApi.Controllers
 
             await messagingClient.ReplyMessageAsync(ev.ReplyToken, $"Hello {userName}! Thank you for following !");
         }
-        
+
 
         protected override async Task OnJoinAsync(JoinEvent ev)
         {
@@ -117,7 +153,7 @@ namespace HYLineWebApi.Controllers
             if (userMessage == "buttons")
             {
                 replyMessage = new TemplateMessage("Button Template",
-                    new ButtonsTemplate(text:"ButtonsTemplate", title:"Click Buttons.",
+                    new ButtonsTemplate(text: "ButtonsTemplate", title: "Click Buttons.",
                     actions: new List<ITemplateAction> {
                         new MessageTemplateAction("Message Label", "sample data"),
                         new PostbackTemplateAction("Postback Label", "sample data", "sample data"),
