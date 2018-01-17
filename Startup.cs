@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HYLineBotWebApi.DataClass;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,11 @@ namespace HYLineWebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var configManager = new ConfigManager();
+            Configuration.GetSection("Config").Bind(configManager);
+            ConfigProvider.ConnectionString = configManager.ConnectionString;
+            ConfigProvider.ChannelAccessToken = configManager.ChannelAccessToken;
+            ConfigProvider.UserIDList = configManager.UserIDList;
             services.AddMvc();
         }
 
