@@ -59,20 +59,24 @@ namespace HYLineWebApi.Controllers
         {
             var adapter = new DataAdapter();
             var areaResult = adapter.SearchArea(messageSpilt[1]);
-            var groupByName = areaResult.Take(3).GroupBy(g => g.Name);
-            List<ITemplateAction> actions1 = new List<ITemplateAction>();
+            var groupByName = areaResult.GroupBy(g => g.Name);
+            List<ITemplateAction> actions = new List<ITemplateAction>();
+            List<CarouselColumn> column = new List<CarouselColumn>();
+
             foreach (var textile in groupByName)
             {
-                actions1.Add(new MessageTemplateAction(textile.Key, string.Concat("?名稱", textile.Key)));
+                actions.Add(new MessageTemplateAction(textile.Key, string.Concat("?名稱 ", textile.Key)));
             }
-            // Add actions.
-            // actions1.Add(new MessageTemplateAction(groupByName.First().Key, string.Concat("?名稱", groupByName.First().Key)));
-            // actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
-            // actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
+            int perPage = 3;
+            for (var i = 0; i <= actions.Count() % 3; i++)
+            {
+                var eachPage = actions.Skip(perPage * i).Take(perPage).ToList();
+                column.Add(new CarouselColumn(string.Concat("搜尋的倉庫:", messageSpilt[1]), actions: eachPage));
+            }
 
             var replyMessage = new TemplateMessage("Button Template",
                 new CarouselTemplate(new List<CarouselColumn> {
-                        new CarouselColumn(messageSpilt[1],actions: actions1)
+                        new CarouselColumn(messageSpilt[1],actions: actions)
                 }));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
