@@ -77,6 +77,30 @@ namespace HYLineWebApi.Controllers
 
             var replyMessage = new TemplateMessage("Button Template",
                 new CarouselTemplate(column));
+
+                 List<ITemplateAction> actions1 = new List<ITemplateAction>();
+                List<ITemplateAction> actions2 = new List<ITemplateAction>();
+
+                // Add actions.
+                actions1.Add(new MessageTemplateAction("Message Label", "sample data"));
+                actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
+                actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
+
+                // Add datetime picker actions
+                actions2.Add(new DateTimePickerTemplateAction("DateTime Picker", "DateTime",
+                    DateTimePickerMode.Datetime, "2017-07-21T13:00", null, null));
+                actions2.Add(new DateTimePickerTemplateAction("Date Picker", "Date",
+                    DateTimePickerMode.Date, "2017-07-21", null, null));
+                actions2.Add(new DateTimePickerTemplateAction("Time Picker", "Time",
+                    DateTimePickerMode.Time, "13:00", null, null));
+
+                replyMessage = new TemplateMessage("Button Template",
+                    new CarouselTemplate(new List<CarouselColumn> {
+                        new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
+                        "Casousel 1 Title", actions1),
+                        new CarouselColumn("Casousel 1 Text", "https://github.com/apple-touch-icon.png",
+                        "Casousel 1 Title", actions2)
+                    }));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
 
