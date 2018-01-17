@@ -75,9 +75,7 @@ namespace HYLineWebApi.Controllers
             }
 
             var replyMessage = new TemplateMessage("Button Template",
-                new CarouselTemplate(new List<CarouselColumn> {
-                        new CarouselColumn(messageSpilt[1],actions: actions)
-                }));
+                new CarouselTemplate(column));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
 
