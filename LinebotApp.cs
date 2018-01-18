@@ -70,15 +70,15 @@ namespace HYLineWebApi.Controllers
             int totalCount = 6;
             int perPage = 3;
             int defaultPage = messageSpilt.Count() == 3 ? Convert.ToInt32(messageSpilt[2]) : 0;
-            actions = actions.Skip(totalCount * defaultPage).Take(totalCount).ToList();
-            if (actions.Count() == 0)
+            var perPartactions = actions.Skip(totalCount * defaultPage).Take(totalCount).ToList();
+            if (perPartactions.Count() == 0)
             {
                 await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("已無資料") });
                 return;
             }
-            for (var i = 0; i < Convert.ToInt32(Math.Ceiling(Convert.ToDouble(actions.Count()) / 3)); i++)
+            for (var i = 0; i < Convert.ToInt32(Math.Ceiling(Convert.ToDouble(perPartactions.Count()) / 3)); i++)
             {
-                var eachPage = actions.Skip(perPage * i).Take(perPage).ToList();
+                var eachPage = perPartactions.Skip(perPage * i).Take(perPage).ToList();
                 column.Add(new CarouselColumn(string.Concat("搜尋的倉庫:", messageSpilt[1]), actions: eachPage));
             }
 
@@ -90,7 +90,7 @@ namespace HYLineWebApi.Controllers
                     column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage + 1)));
                 }
             }
-            else
+            else if (actions.Count() > totalCount * (defaultPage + 1))
             {
                 column.Add(new CarouselColumn("欲搜尋下一頁請點選", actions: new List<ITemplateAction>()
                 {
