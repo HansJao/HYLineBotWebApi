@@ -69,7 +69,7 @@ namespace HYLineWebApi.Controllers
             }
             int totalCount = 6;
             int perPage = 3;
-            int defaultPage = messageSpilt.Count() >= 3 ? Convert.ToInt32(messageSpilt[2]) : 0;
+            int defaultPage = messageSpilt.Count() == 3 ? Convert.ToInt32(messageSpilt[2]) : 0;
             actions = actions.Skip(totalCount * defaultPage).Take(totalCount).ToList();
             if (actions.Count() == 0)
             {
@@ -81,17 +81,21 @@ namespace HYLineWebApi.Controllers
                 var eachPage = actions.Skip(perPage * i).Take(perPage).ToList();
                 column.Add(new CarouselColumn(string.Concat("搜尋的倉庫:", messageSpilt[1]), actions: eachPage));
             }
-            //   var eachPage = actions.Skip(perPage * i).Take(perPage).Count() == 1 
-            //                 ? actions.Skip(perPage * i).Take(perPage).ToList()
-            //                 :actions.Skip(perPage * i).Take(perPage).ToList();
+
             if (column.Last().Actions.Count() != 3)
             {
                 column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage + 1)));
+                if (column.Last().Actions.Count() == 2)
+                {
+                    column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage + 1)));
+                }
             }
             else
             {
                 column.Add(new CarouselColumn("欲搜尋下一頁請點選", actions: new List<ITemplateAction>()
                 {
+                   new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1]," ", defaultPage + 1)),
+                   new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1]," ", defaultPage + 1)),
                    new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1]," ", defaultPage + 1))
                 }));
             }
@@ -99,34 +103,6 @@ namespace HYLineWebApi.Controllers
             var replyMessage = new TemplateMessage("Button Template",
                 new CarouselTemplate(column));
 
-            List<ITemplateAction> actions1 = new List<ITemplateAction>();
-            List<ITemplateAction> actions2 = new List<ITemplateAction>();
-
-            // Add actions.
-            actions1.Add(new MessageTemplateAction("Message Label", "sample data"));
-            actions1.Add(new PostbackTemplateAction("Postback Label", "sample data", "sample data"));
-            actions1.Add(new UriTemplateAction("Uri Label", "https://github.com/kenakamu"));
-
-            if (messageSpilt[3] == "test1")
-            {
-                actions2.Add(new MessageTemplateAction("Message Label", "sample data"));
-                actions2.Add(new MessageTemplateAction("Message Label", "sample data"));
-                actions2.Add(new MessageTemplateAction("Message Label", "sample data"));
-            }
-            else if (messageSpilt[3] == "test2")
-            {
-                actions2.Add(new MessageTemplateAction("Message", "sample"));
-                actions2.Add(new MessageTemplateAction("Message Label", "sample data"));
-            }
-            else if (messageSpilt[3] == "test3")
-            {
-                actions2.Add(new MessageTemplateAction("Message", "sample"));
-            }
-            replyMessage = new TemplateMessage("Button Template",
-                   new CarouselTemplate(new List<CarouselColumn> {
-                        new CarouselColumn("Casousel 1 Text",actions: actions1),
-                        new CarouselColumn("Casousel 1 Text",actions: actions2)
-                   }));
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
         }
 
