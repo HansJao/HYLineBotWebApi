@@ -43,7 +43,7 @@ namespace HYLineWebApi.Controllers
                     await SearchName(mev, messageSpilt);
                     break;
                 case "+":
-                    await HandleTextAsync(mev.ReplyToken, "新增", mev.Source.UserId);
+                    await Insert(mev, messageSpilt);
                     break;
                 case "help":
                     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
@@ -56,6 +56,34 @@ namespace HYLineWebApi.Controllers
             }
             //await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
         }
+
+        private async Task Insert(MessageEvent mev, string[] messageSpilt)
+        {
+            var area = messageSpilt[1];
+            var name = messageSpilt[2];
+            var color = messageSpilt[3];
+            var position = messageSpilt[4];
+            var quantity = Convert.ToInt32(messageSpilt[5]);
+            var memo = messageSpilt[6];
+            var userName = GetUserName(mev.Source.UserId);
+            DataAdapter da = new DataAdapter();
+            var result = da.Insert(area, name, color, position, quantity, userName, memo);
+            var replyMessage = "新增失敗";
+            if (result == 1)
+                replyMessage = "新增成功";
+            await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage(replyMessage) });
+        }
+
+        private string GetUserName(string userID)
+        {
+            if (ConfigProvider.UserIDList.Count() == 0 || ConfigProvider.UserIDList.Where(w => w.Value == userID).Count() == 0)
+            {
+                return userID;
+            }
+            var user = ConfigProvider.UserIDList.Where(w => w.Value == userID).FirstOrDefault();
+            return user.Key;
+        }
+
         private async Task SearchName(MessageEvent mev, string[] messageSpilt)
         {
             DataAdapter da = new DataAdapter();
