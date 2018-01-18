@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HYLineBotWebApi.Adapter;
+using HYLineBotWebApi.DataClass;
 using Line.Messaging;
 using Line.Messaging.Webhooks;
 using static HYLineBotWebApi.DataClass.Enumeration.PageEnum;
@@ -39,7 +40,7 @@ namespace HYLineWebApi.Controllers
                     await SearchStore(mev, messageSpilt);
                     break;
                 case "?名稱":
-                    await HandleTextAsync(mev.ReplyToken, "查詢名稱", mev.Source.UserId);
+                    await SearchName(mev, messageSpilt);
                     break;
                 case "+":
                     await HandleTextAsync(mev.ReplyToken, "新增", mev.Source.UserId);
@@ -55,12 +56,13 @@ namespace HYLineWebApi.Controllers
             }
             //await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
         }
-        // private async Task SearchName(MessageEvent mev, string[] messageSpilt)
-        // {
-        //     DataAdapter da = new DataAdapter();
-        //     var result = da.SearchName(messageSpilt[1]);
-        //     //await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
-        // }
+        private async Task SearchName(MessageEvent mev, string[] messageSpilt)
+        {
+            DataAdapter da = new DataAdapter();
+            var result = da.SearchName(messageSpilt[1]);
+            var replyMessage = GetReplyMessage(result);
+            await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage(replyMessage) });
+        }
         private async Task SearchStore(MessageEvent mev, string[] messageSpilt)
         {
             var adapter = new DataAdapter();
@@ -122,6 +124,24 @@ namespace HYLineWebApi.Controllers
                 new CarouselTemplate(column));
 
             await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
+        }
+
+        private string GetReplyMessage(IEnumerable<TextileStore> textileStoreList)
+        {
+            var replyMessage = string.Empty;
+            foreach (var textile in textileStoreList)
+            {
+                replyMessage += string.Concat("編號:", textile.ID, "\n",
+                                              "地點:", textile.Area, "\n",
+                                              "名稱:", textile.Name, "\n",
+                                              "顏色:", textile.Color, "\n",
+                                              "儲位:", textile.Position, "\n",
+                                              "數量:", textile.Quantity, "\n",
+                                              "備註:", textile.Memo, "\n",
+                                              "更新時間:", textile.ModifyDate.ToString("yyyy/MM/dd HH:mm:ss"), "\n",
+                                              "修改人員:", textile.ModifyUser, "\n", "---------------------", "\n");
+            }
+            return replyMessage;
         }
 
         private string ConvertToNarrow(string text)
