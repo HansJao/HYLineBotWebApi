@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HYLineBotWebApi.Adapter;
 using Line.Messaging;
 using Line.Messaging.Webhooks;
+using static HYLineBotWebApi.DataClass.Enumeration.PageEnum;
 
 namespace HYLineWebApi.Controllers
 {
@@ -54,7 +55,12 @@ namespace HYLineWebApi.Controllers
             }
             //await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
         }
-
+        // private async Task SearchName(MessageEvent mev, string[] messageSpilt)
+        // {
+        //     DataAdapter da = new DataAdapter();
+        //     var result = da.SearchName(messageSpilt[1]);
+        //     //await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { replyMessage });
+        // }
         private async Task SearchStore(MessageEvent mev, string[] messageSpilt)
         {
             var adapter = new DataAdapter();
@@ -67,30 +73,42 @@ namespace HYLineWebApi.Controllers
             {
                 actions.Add(new MessageTemplateAction(textile.Key, string.Concat("?名稱 ", textile.Key)));
             }
-            int totalCount = 6;
-            int perPage = 3;
             int defaultPage = messageSpilt.Count() == 3 ? Convert.ToInt32(messageSpilt[2]) : 0;
-            var perPartactions = actions.Skip(totalCount * defaultPage).Take(totalCount).ToList();
-            if (perPartactions.Count() == 0)
+            var perPartActions = actions.Skip((int)SearchPageEnum.TotalCount * defaultPage).Take((int)SearchPageEnum.TotalCount).ToList();
+            if (perPartActions.Count() == 0)
             {
                 await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("已無資料") });
                 return;
             }
-            for (var i = 0; i < Convert.ToInt32(Math.Ceiling(Convert.ToDouble(perPartactions.Count()) / 3)); i++)
+            for (var i = 0; i < Convert.ToInt32(Math.Ceiling(Convert.ToDouble(perPartActions.Count()) / (int)SearchPageEnum.PerColumn)); i++)
             {
-                var eachPage = perPartactions.Skip(perPage * i).Take(perPage).ToList();
+                var eachPage = perPartActions.Skip((int)SearchPageEnum.PerColumn * i).Take((int)SearchPageEnum.PerColumn).ToList();
                 column.Add(new CarouselColumn(string.Concat("搜尋的倉庫:", messageSpilt[1]), actions: eachPage));
             }
 
-            if (column.Last().Actions.Count() != 3)
+            if (column.Last().Actions.Count() != (int)SearchPageEnum.PerColumn)
             {
-                column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage + 1)));
-                if (column.Last().Actions.Count() == 2)
+                //如果數量還有才要顯示下一頁
+                if (actions.Count() > (int)SearchPageEnum.TotalCount * (defaultPage + 1))
                 {
-                    column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage + 1)));
+                    column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage++)));
+                    if (column.Last().Actions.Count() == 2)
+                    {
+                        column.Last().Actions.Add(new MessageTemplateAction("下一頁", string.Concat("?倉庫 ", messageSpilt[1], " ", defaultPage + 1)));
+                    }
+                }
+                //數量已經沒了
+                else
+                {
+                    column.Last().Actions.Add(new MessageTemplateAction("沒了", "就沒了阿"));
+                    if (column.Last().Actions.Count() == 2)
+                    {
+                        column.Last().Actions.Add(new MessageTemplateAction("沒了", "就沒了咩"));
+                    }
                 }
             }
-            else if (actions.Count() > totalCount * (defaultPage + 1))
+            //如果數量還有才要顯示下一頁
+            else if (actions.Count() > (int)SearchPageEnum.TotalCount * (defaultPage + 1))
             {
                 column.Add(new CarouselColumn("欲搜尋下一頁請點選", actions: new List<ITemplateAction>()
                 {
