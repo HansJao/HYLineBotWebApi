@@ -45,16 +45,30 @@ namespace HYLineWebApi.Controllers
                 case "+":
                     await Insert(mev, messageSpilt);
                     break;
+                case "-":
+                    await DeleteById(mev, messageSpilt);
+                    break;
                 case "help":
                     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
                     {
-                        new TextMessage("======查詢指令!======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
+                        new TextMessage("======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
                     });
                     break;
                 default:
                     return;
             }
             //await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
+        }
+
+        private async Task DeleteById(MessageEvent mev, string[] messageSpilt)
+        {
+            var id = Convert.ToInt32(messageSpilt[1]);
+            DataAdapter da = new DataAdapter();
+            var result = da.DelectByID(id);
+            var replyMessage = "刪除失敗";
+            if (result == 1)
+                replyMessage = "刪除成功";
+            await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage(replyMessage) });
         }
 
         private async Task Insert(MessageEvent mev, string[] messageSpilt)
