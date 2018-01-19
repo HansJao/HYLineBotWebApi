@@ -96,7 +96,7 @@ namespace HYLineWebApi.Controllers
             int id;
             if (messageSpilt.Count() != 2)
             {
-                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("更新指令錯誤!!\n !刪除 [編號]") });
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("更新指令錯誤!!\n - [編號]") });
                 return;
             }
             if (!int.TryParse(messageSpilt[1], out id))
@@ -143,7 +143,7 @@ namespace HYLineWebApi.Controllers
         {
             if (messageSpilt.Count() != 2)
             {
-                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢名稱指令錯誤!!\n !名稱 [布名]") });
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢名稱指令錯誤!!\n ?名稱 [布名]") });
                 return;
             }
             DataAdapter da = new DataAdapter();
@@ -153,11 +153,11 @@ namespace HYLineWebApi.Controllers
         }
         private async Task SearchStore(MessageEvent mev, string[] messageSpilt)
         {
-            // if (messageSpilt.Count() != 2)
-            // {
-            //     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢倉庫指令錯誤!!\n !倉庫 [倉庫名稱]") });
-            //     return;
-            // }
+            if (messageSpilt.Count() < 2 || messageSpilt.Count() > 3)
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢倉庫指令錯誤!!\n ?倉庫 [倉庫名稱]") });
+                return;
+            }
             var adapter = new DataAdapter();
             var areaResult = adapter.SearchArea(messageSpilt[1]);
             var groupByName = areaResult.GroupBy(g => g.Name);
