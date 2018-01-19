@@ -153,11 +153,11 @@ namespace HYLineWebApi.Controllers
         }
         private async Task SearchStore(MessageEvent mev, string[] messageSpilt)
         {
-            if (messageSpilt.Count() != 2)
-            {
-                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢倉庫指令錯誤!!\n !倉庫 [倉庫名稱]") });
-                return;
-            }
+            // if (messageSpilt.Count() != 2)
+            // {
+            //     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢倉庫指令錯誤!!\n !倉庫 [倉庫名稱]") });
+            //     return;
+            // }
             var adapter = new DataAdapter();
             var areaResult = adapter.SearchArea(messageSpilt[1]);
             var groupByName = areaResult.GroupBy(g => g.Name);
