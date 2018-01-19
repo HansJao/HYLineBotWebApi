@@ -18,10 +18,7 @@ namespace HYLineWebApi.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            var y = 0 ;
-            var x = 30/y;
-            //lineMessagingClient = new LineMessagingClient("VO8CJj2Uwn2h5Mjm4884whpRKOXonme17QnbPQXatFKIDckf33rFM8jL+8Qv0hCPY0unc80NrZiWKR/Ut4qv1gSuRUAYdXZwMhctijKzqsVRbVD3Vm1STrcdMQzzu0QKeTjd/5pFDHF6jc9w35OKbwdB04t89/1O/w1cDnyilFU=");
-            return new string[] { "value1", "value2" };
+          return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
