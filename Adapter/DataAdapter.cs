@@ -82,16 +82,20 @@ namespace HYLineBotWebApi.Adapter
             return result;
         }
 
-        public int UpdateQuantityByID(int id, int quantity)
+        public int UpdateQuantityByID(int id, int quantity, string userName)
         {
             var commandText = @"UPDATE TextileStore
-                                SET Quantity = @Quantity
+                                SET Quantity = @Quantity,
+                                ModifyUser = @UserName,
+                                ModifyDate = @ModifyDate
                                  WHERE Id = @Id
                                 SELECT @@ROWCOUNT AS UpdateRow;";
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id",SqlDbType.Int){Value = id},
-                new SqlParameter("@Quantity",SqlDbType.Int){Value = quantity}
+                new SqlParameter("@Quantity",SqlDbType.Int){Value = quantity},
+                new SqlParameter("@UserName",SqlDbType.NVarChar){Value = userName},
+                new SqlParameter("@ModifyDate",SqlDbType.DateTime){Value = DateTime.Now}
             };
             var result = DapperHelper.QueryCollection<int>(ConfigProvider.ConnectionString, CommandType.Text, commandText, parameters).FirstOrDefault();
 

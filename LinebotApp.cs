@@ -73,17 +73,18 @@ namespace HYLineWebApi.Controllers
             }
             if (!int.TryParse(messageSpilt[1], out id))
             {
-                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!輸入的編號不是數字!") });
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!\n輸入的編號不是數字!") });
                 return;
             }
             if (!int.TryParse(messageSpilt[2], out quantity))
             {
-                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!輸入的數量不是數字!") });
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!\n輸入的數量不是數字!") });
                 return;
             }
 
+            var userName = GetUserName(mev.Source.UserId);
             DataAdapter da = new DataAdapter();
-            var result = da.UpdateQuantityByID(id, quantity);
+            var result = da.UpdateQuantityByID(id, quantity, userName);
             var replyMessage = "更新失敗";
             if (result == 1)
                 replyMessage = "更新成功";
@@ -100,7 +101,7 @@ namespace HYLineWebApi.Controllers
             }
             if (!int.TryParse(messageSpilt[1], out id))
             {
-                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!輸入的編號不是數字!") });
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!\n輸入的編號不是數字!") });
                 return;
             }
             DataAdapter da = new DataAdapter();
