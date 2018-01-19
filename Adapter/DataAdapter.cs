@@ -8,7 +8,7 @@ using HYLineBotWebApi.DataClass;
 
 namespace HYLineBotWebApi.Adapter
 {
-   public class DataAdapter
+    public class DataAdapter
     {
         // public List<DataObject> Get(int TableNameId)
         // {
@@ -22,7 +22,7 @@ namespace HYLineBotWebApi.Adapter
         //     return result.ToList();
         // }
 
-        public int Insert(string area, string name, string color, string position,int quantity,  string userName, string memo)
+        public int Insert(string area, string name, string color, string position, int quantity, string userName, string memo)
         {
             var commandText = @"INSERT INTO dbo.TextileStore
                                 (Area,Name,Color,Position,Quantity,ModifyUser,ModifyDate,Memo)
@@ -76,6 +76,22 @@ namespace HYLineBotWebApi.Adapter
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id",SqlDbType.Int){Value = id}
+            };
+            var result = DapperHelper.QueryCollection<int>(ConfigProvider.ConnectionString, CommandType.Text, commandText, parameters).FirstOrDefault();
+
+            return result;
+        }
+
+        public int UpdateQuantityByID(int id, int quantity)
+        {
+            var commandText = @"UPDATE TextileStore
+                                SET Quantity = @Quantity
+                                 WHERE Id = @Id
+                                SELECT @@ROWCOUNT AS UpdateRow;";
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Id",SqlDbType.Int){Value = id},
+                new SqlParameter("@Quantity",SqlDbType.Int){Value = quantity}
             };
             var result = DapperHelper.QueryCollection<int>(ConfigProvider.ConnectionString, CommandType.Text, commandText, parameters).FirstOrDefault();
 

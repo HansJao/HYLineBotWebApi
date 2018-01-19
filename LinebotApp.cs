@@ -36,6 +36,9 @@ namespace HYLineWebApi.Controllers
                 case "!":
                     await HandleTextAsync(mev.ReplyToken, "修改", mev.Source.UserId);
                     break;
+                case "!數量":
+                    await UpdateQuantityById(mev, messageSpilt);
+                    break;
                 case "?倉庫":
                     await SearchStore(mev, messageSpilt);
                     break;
@@ -51,7 +54,7 @@ namespace HYLineWebApi.Controllers
                 case "help":
                     await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage>
                     {
-                        new TextMessage("======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n ! [顆顆,還沒做]\n ======刪除指令======\n - [編號]")
+                        new TextMessage("======查詢指令======\n ?倉庫 [倉庫名稱] \n ?名稱 [布種名稱] \n ======新增指令======\n + [倉庫名稱] [布種名稱] [顏色] [儲位] [數量] [備註] \n ======修改指令======\n !數量 [編號] [數量]\n ======刪除指令======\n - [編號]")
                     });
                     break;
                 default:
@@ -59,10 +62,47 @@ namespace HYLineWebApi.Controllers
             }
             //await HandleTextAsync(mev.ReplyToken, ((TextEventMessage)mev.Message).Text, mev.Source.UserId);
         }
+        private async Task UpdateQuantityById(MessageEvent mev, string[] messageSpilt)
+        {
+            int id;
+            int quantity;
+            if (messageSpilt.Count() != 3)
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("更新指令錯誤!!\n !數量 [編號] [數量]") });
+                return;
+            }
+            if (!int.TryParse(messageSpilt[1], out id))
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!輸入的編號不是數字!") });
+                return;
+            }
+            if (!int.TryParse(messageSpilt[2], out quantity))
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!輸入的數量不是數字!") });
+                return;
+            }
+
+            DataAdapter da = new DataAdapter();
+            var result = da.UpdateQuantityByID(id, quantity);
+            var replyMessage = "更新失敗";
+            if (result == 1)
+                replyMessage = "更新成功";
+            await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage(replyMessage) });
+        }
 
         private async Task DeleteById(MessageEvent mev, string[] messageSpilt)
         {
-            var id = Convert.ToInt32(messageSpilt[1]);
+            int id;
+            if (messageSpilt.Count() != 2)
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("更新指令錯誤!!\n !刪除 [編號]") });
+                return;
+            }
+            if (!int.TryParse(messageSpilt[1], out id))
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("參數錯誤!輸入的編號不是數字!") });
+                return;
+            }
             DataAdapter da = new DataAdapter();
             var result = da.DelectByID(id);
             var replyMessage = "刪除失敗";
@@ -100,6 +140,11 @@ namespace HYLineWebApi.Controllers
 
         private async Task SearchName(MessageEvent mev, string[] messageSpilt)
         {
+            if (messageSpilt.Count() != 2)
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢名稱指令錯誤!!\n !名稱 [布名]") });
+                return;
+            }
             DataAdapter da = new DataAdapter();
             var result = da.SearchName(messageSpilt[1]);
             var replyMessage = GetReplyMessage(result);
@@ -107,6 +152,11 @@ namespace HYLineWebApi.Controllers
         }
         private async Task SearchStore(MessageEvent mev, string[] messageSpilt)
         {
+            if (messageSpilt.Count() != 2)
+            {
+                await messagingClient.ReplyMessageAsync(mev.ReplyToken, new List<ISendMessage> { new TextMessage("查詢倉庫指令錯誤!!\n !倉庫 [倉庫名稱]") });
+                return;
+            }
             var adapter = new DataAdapter();
             var areaResult = adapter.SearchArea(messageSpilt[1]);
             var groupByName = areaResult.GroupBy(g => g.Name);
